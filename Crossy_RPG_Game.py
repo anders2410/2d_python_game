@@ -38,11 +38,13 @@ class Game:
         direction = 0
 
         player_character = PlayerCharacter('images/player.png', 375, 700, 50, 50)
+        enemy_list = []
         enemy_0 = EnemyCharacter('images/enemy.png', 20, 600, 50, 50)
-        enemy_0.SPEED *= level_speed
+        enemy_list.append(enemy_0)
         enemy_1 = EnemyCharacter('images/enemy.png', self.width - 70, 400, 50, 50)
-        enemy_1.SPEED *= level_speed
         enemy_2 = EnemyCharacter('images/enemy.png', 20, 200, 50, 50)
+        enemy_0.SPEED *= level_speed
+        enemy_1.SPEED *= level_speed
         enemy_2.SPEED *= level_speed
 
         treasure = GameObject('images/treasure.png', 375, 50, 50, 50)
@@ -64,14 +66,14 @@ class Game:
                         direction = 0
 
             self.game_screen.fill(WHITE_COLOR)
-            self.game_screen.blit(self.background_image, (0,0))
+            self.game_screen.blit(self.background_image, (0, 0))
 
             treasure.draw(self.game_screen)
 
             player_character.move(direction, self.height)
             player_character.draw(self.game_screen)
 
-            # Move and draw enemy
+            # Move and draw enemies
             enemy_0.move(self.width)
             enemy_0.draw(self.game_screen)
 
