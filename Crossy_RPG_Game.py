@@ -10,6 +10,8 @@ WHITE_COLOR = (255, 255, 255)
 BLACK_COLOR = (0, 0, 0)
 # Clock used to update game events and frames
 clock = pygame.time.Clock()
+pygame.font.init()
+font = pygame.font.SysFont('comicsans', 75)
 
 
 class Game:
@@ -17,7 +19,7 @@ class Game:
     TICK_RATE = 60
     is_game_over = False
 
-    def __init__(self, title, width, height):
+    def __init__(self, background_path, title, width, height):
         self.title = title
         self.width = width
         self.height = height
@@ -27,12 +29,22 @@ class Game:
         self.game_screen.fill(WHITE_COLOR)
         pygame.display.set_caption(title)
 
-    def run_game_loop(self):
+        background_image = pygame.image.load(background_path)
+        self.background_image = pygame.transform.scale(background_image, (width, height))
+
+    def run_game_loop(self, level_speed):
         is_game_over = False
+        did_win = False
         direction = 0
 
         player_character = PlayerCharacter('images/player.png', 375, 700, 50, 50)
-        enemy_0 = EnemyCharacter('images/enemy.png', 20, 400, 50, 50)
+        enemy_0 = EnemyCharacter('images/enemy.png', 20, 600, 50, 50)
+        enemy_0.SPEED *= level_speed
+        enemy_1 = EnemyCharacter('images/enemy.png', self.width - 70, 400, 50, 50)
+        enemy_1.SPEED *= level_speed
+        enemy_2 = EnemyCharacter('images/enemy.png', 20, 200, 50, 50)
+        enemy_2.SPEED *= level_speed
+
         treasure = GameObject('images/treasure.png', 375, 50, 50, 50)
 
         # Main game loop, used to update all gameplay such as movement, check and graphics.
@@ -52,6 +64,8 @@ class Game:
                         direction = 0
 
             self.game_screen.fill(WHITE_COLOR)
+            self.game_screen.blit(self.background_image, (0,0))
+
             treasure.draw(self.game_screen)
 
             player_character.move(direction, self.height)
@@ -61,16 +75,40 @@ class Game:
             enemy_0.move(self.width)
             enemy_0.draw(self.game_screen)
 
+            if level_speed > 2:
+                enemy_1.move(self.width)
+                enemy_1.draw(self.game_screen)
+            if level_speed > 3:
+                enemy_2.move(self.width)
+                enemy_2.draw(self.game_screen)
+
             # Detect collision
             if player_character.detect_collision(enemy_0):
                 is_game_over = True
+                did_win = False
+                text = font.render('You Lost!', True, BLACK_COLOR)
+                self.game_screen.blit(text, (300, 350))
+                pygame.display.update()
+                clock.tick(1)
+                break
             elif player_character.detect_collision(treasure):
                 is_game_over = True
+                did_win = True
+                text = font.render('You Won!', True, BLACK_COLOR)
+                self.game_screen.blit(text, (300, 350))
+                pygame.display.update()
+                clock.tick(1)
+                break
 
             # Update all game graphics
             pygame.display.update()
             # Tick the clock to update
             clock.tick(self.TICK_RATE)
+
+        if did_win:
+            self.run_game_loop(level_speed + 0.5)
+        else:
+            return
 
 
 # Generic game object class to be subclassed by other objects in the game
@@ -137,8 +175,8 @@ class EnemyCharacter(GameObject):
 
 pygame.init()
 
-new_game = Game(SCREEN_TITLE, SCREEN_WIDTH, SCREEN_HEIGHT)
-new_game.run_game_loop()
+new_game = Game('images/background.png', SCREEN_TITLE, SCREEN_WIDTH, SCREEN_HEIGHT)
+new_game.run_game_loop(1)
 
 pygame.quit()
 quit()
