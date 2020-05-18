@@ -31,7 +31,9 @@ class Game:
         is_game_over = False
         direction = 0
 
+        player_character = PlayerCharacter('images/player.png', 375, 700, 50, 50)
         enemy_0 = EnemyCharacter('images/enemy.png', 20, 400, 50, 50)
+        treasure = GameObject('images/treasure.png', 375, 50, 50, 50)
 
         # Main game loop, used to update all gameplay such as movement, check and graphics.
         while not is_game_over:
@@ -50,8 +52,20 @@ class Game:
                         direction = 0
 
             self.game_screen.fill(WHITE_COLOR)
+            treasure.draw(self.game_screen)
+
+            player_character.move(direction, self.height)
+            player_character.draw(self.game_screen)
+
+            # Move and draw enemy
             enemy_0.move(self.width)
             enemy_0.draw(self.game_screen)
+
+            # Detect collision
+            if player_character.detect_collision(enemy_0):
+                is_game_over = True
+            elif player_character.detect_collision(treasure):
+                is_game_over = True
 
             # Update all game graphics
             pygame.display.update()
@@ -89,8 +103,21 @@ class PlayerCharacter(GameObject):
         elif direction < 0:
             self.y_pos += self.SPEED
 
-        if self.y_pos >= max_height - 20:
-            self.y_pos = max_height - 20
+        if self.y_pos >= max_height - 20 - self.height:
+            self.y_pos = max_height - 20 - self.height
+
+    def detect_collision(self, other_entity: GameObject):
+        if self.y_pos > other_entity.y_pos + other_entity.height:
+            return False
+        elif self.y_pos + self.height < other_entity.y_pos:
+            return False
+
+        if self.x_pos > other_entity.x_pos + other_entity.width:
+            return False
+        if self.x_pos + self.width < other_entity.x_pos:
+            return False
+        return True
+
 
 # Class to represent the character controlled by the player
 class EnemyCharacter(GameObject):
